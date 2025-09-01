@@ -1,0 +1,104 @@
+.admin-sidebar {
+  width: 85px;
+  background: #fff;
+  padding: 0;
+  transition: width 0.3s ease;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: fixed;
+  margin-top: 60px;
+}
+.admin-sidebar.open {
+  width: 200px;
+}
+.admin-logo {
+  text-align: center;
+  font-size: 28px;
+  cursor: pointer;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  border-radius: 10px;
+  margin-left: 10px;
+  z-index: 1;
+  padding: 10px 0;
+}
+
+.admin-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  margin-left: 10px;
+}
+
+.admin-sidebar li {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.admin-sidebar li:hover {
+  background: #D1D6E0;
+}
+
+.admin-icon {
+  font-size: 18px;
+  margin-right: 10px;
+}
+
+.admin-label {
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.dropdown-arrow {
+  margin-left: auto;
+  transition: transform 0.2s ease;
+}
+
+.dropdown-menu {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+  width: 100%;
+  padding-left: 20px;
+}
+
+.dropdown-menu.open {
+  max-height: 200px; /* Adjust based on your content */
+  transition: max-height 0.3s ease-in;
+}
+
+.dropdown-item {
+  padding-left: 30px !important;
+  transition: background 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background: #C1C6D0 !important;
+}
+
+/* Show labels when either open or hovered */
+.admin-sidebar.open .admin-label{
+  opacity: 1;
+}
+
+
+
+/* Full screen on mobile */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+    width: 100%;
+  }
+
+  .admin-sidebar.open {
+    transform: translateX(0%);
+    width: 100%;
+  }
+}

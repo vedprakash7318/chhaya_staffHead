@@ -1,0 +1,167 @@
+/* ===== Navbar Container ===== */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  height: 60px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  transition: left 0.3s ease;
+}
+
+/* ===== Left Side (Logo + Menu Toggle + Search) ===== */
+.navbar-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.admin-logo {
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #4a90e2;
+}
+
+.menu-toggle {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: #555;
+}
+
+/* ===== Search Bar ===== */
+.search-bar .Heading{
+  font-family: 'Poppins',sans-serif;
+  font-size: 20px;
+font-weight: bold;  
+color: #2C3E50;
+}
+
+/* ===== Right Side (Icons + Profile) ===== */
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+}
+
+.nav-icon {
+  position: relative;
+  color: #555;
+  cursor: pointer;
+  font-size: 1.1rem;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #ff4757;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ===== Profile ===== */
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  position: relative;
+}
+
+.user-avatar {
+  font-size: 1.5rem;
+  color: #4a90e2;
+}
+
+.username {
+  font-weight: 500;
+  color: #333;
+}
+
+/* ===== Profile Dropdown ===== */
+.profile-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  width: 150px;
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+.dropdown-item {
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 14px;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== When Sidebar is Open (optional class) ===== */
+.sidebar-open .navbar {
+  left: 200px; /* Adjust to match sidebar width */
+}
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 768px) {
+  .search-bar,
+  .nav-icon:not(:last-child),  /* Hide bell and envelope */
+  .username {
+    display: none;
+  }
+
+  .navbar-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+
+  .menu-toggle {
+    margin-left: auto;
+    font-size: 1.3rem;
+  }
+
+  .navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .user-profile {
+    position: relative;
+    bottom: 2px;
+  }
+}

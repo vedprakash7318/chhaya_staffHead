@@ -1,0 +1,33 @@
+/* StaffLogin.css */
+.staff-login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #e0eafc, #cfdef3);
+  padding: 1rem;
+}
+
+.staff-login-card {
+  background-color: #ffffff;
+  padding: 2rem 2.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+.staff-login-card h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.p-field {
+  margin-bottom: 1rem;
+}
+
+.p-inputtext,
+.p-password {
+  width: 100%;
+}

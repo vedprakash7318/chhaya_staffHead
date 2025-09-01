@@ -1,0 +1,44 @@
+/* Dashboard layout */
+.admin-dashboard {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Main section (navbar + content) */
+.main-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Content area */
+.content-wrapper {
+  flex: 1;
+  padding: 54px 15px;  
+  overflow-y: auto;
+  /* margin-top: 64px;  */
+  margin:55px 10px 10px 10px;
+  transition: margin-left 0.3s ease;
+  background-color: #E5E7F2;
+}
+
+/* Sidebar toggled open */
+.sidebar-open {
+  margin-left: 210px;
+}
+
+/* Sidebar toggled closed */
+.sidebar-closed {
+  margin-left: 94px; 
+}
+
+
+
+@media(max-width:768px){
+  .content-wrapper{
+    margin: 10px;
+    margin-top: 64px;
+  }
+}

@@ -1,0 +1,243 @@
+.reviewLeads-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.reviewLeads-page-title {
+  font-size: 1.5rem;
+  color: #333;
+  margin: 0;
+}
+
+.reviewLeads-search-box {
+  width: 250px;
+}
+
+.reviewLeads-table-wrapper {
+  background-color: #ffffff;
+  padding: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.reviewLeads-photo {
+  width: 45px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+}
+
+.reviewLeads-view-btn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.reviewLeads-spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 80vh;
+}
+
+
+/* Pre-Visa Officer Popup Styles */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.pre-visa-popup {
+  background: white;
+  border-radius: 8px;
+  width: 500px;
+  max-width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f9fa;
+}
+
+.popup-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.close-popup {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+}
+
+.close-popup:hover {
+  color: #333;
+}
+
+.popup-content {
+  padding: 20px;
+}
+
+.search-box {
+  margin-bottom: 15px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.officers-list {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 20px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.officer-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.officer-item:hover {
+  background-color: #f8f9fa;
+}
+
+.officer-item.selected {
+  background-color: #e3f2fd;
+  border-left: 3px solid #2196f3;
+}
+
+.officer-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.officer-email {
+  font-size: 13px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.no-officers {
+  padding: 20px;
+  text-align: center;
+  color: #999;
+}
+
+.popup-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.send-request-btn, .cancel-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.send-request-btn {
+  background-color: #2196f3;
+  color: white;
+}
+
+.send-request-btn:hover:not(:disabled) {
+  background-color: #0b7dda;
+}
+
+.send-request-btn:disabled {
+  background-color: #90caf9;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* New button in form footer */
+.pre-visa-request-button {
+  background-color: #ff9800;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pre-visa-request-button:hover {
+  background-color: #f57c00;
+}
+
+/* Error and success messages */
+.error-message {
+  color: #d32f2f;
+  margin: 10px 0;
+  padding: 8px 12px;
+  background-color: #ffebee;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.success-message {
+  color: #388e3c;
+  margin: 10px 0;
+  padding: 8px 12px;
+  background-color: #e8f5e9;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Loading spinner */
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 18px;
+  color: #666;
+}
+
+/* No data message */
+.no-data {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #999;
+}
