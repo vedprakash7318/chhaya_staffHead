@@ -1,0 +1,502 @@
+/* ============================================
+   JOBPAGE - MODERN STYLING
+   ============================================ */
+
+/* Container Styles */
+.JobPage-container {
+  padding: 2rem;
+  min-height: 100vh;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Header Section */
+.JobPage-header-section {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.JobPage-header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.JobPage-title-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+
+.JobPage-page-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, #2d3748, #4a5568);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.JobPage-page-subtitle {
+  color: #718096;
+  font-size: 1.1rem;
+  margin: 0.5rem 0 0 0;
+  font-weight: 500;
+}
+
+.JobPage-add-btn {
+  background: linear-gradient(135deg, #38b2ac, #2c7a7b) !important;
+  border: none !important;
+  padding: 0.8rem 2rem !important;
+  font-weight: 600 !important;
+  font-size: 1rem !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(56, 178, 172, 0.3) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.JobPage-add-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 15px 40px rgba(56, 178, 172, 0.4) !important;
+}
+
+.JobPage-add-btn:active {
+  transform: translateY(0) !important;
+}
+
+/* Controls Section */
+.JobPage-controls-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.JobPage-search-container {
+  flex: 1;
+  max-width: 400px;
+}
+
+.JobPage-search-wrapper {
+  position: relative;
+}
+
+.JobPage-search-input {
+  width: 100% !important;
+  padding: 1rem 1rem 1rem 3rem !important;
+  border-radius: 15px !important;
+  border: 2px solid rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(10px) !important;
+  font-size: 1rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.JobPage-search-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+  z-index: 10;
+}
+
+.JobPage-stats-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.JobPage-stat-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  padding: 1.5rem;
+  border-radius: 15px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  min-width: 120px;
+}
+
+
+
+.JobPage-stat-label {
+  display: block;
+  color: #718096;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+/* Table Container */
+.JobPage-table-container {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  overflow-x: auto;
+}
+
+
+
+/* Column-specific styles */
+.JobPage-job-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.JobPage-job-icon {
+  color: #4facfe;
+  font-size: 1.1rem;
+}
+
+.JobPage-job-title {
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 1rem;
+}
+
+.JobPage-description-cell {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #4a5568;
+  cursor: help;
+}
+
+.JobPage-work-time-badge {
+  display: inline-block;
+  padding: 0.4rem 0.8rem;
+  background: linear-gradient(135deg, #e6fffa, #b2f5ea);
+  color: #234e52;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.JobPage-salary-value {
+  font-weight: 600;
+  color: #38a169;
+  font-size: 1rem;
+}
+
+.JobPage-service-charge-value {
+  font-weight: 600;
+  color: #3182ce;
+  font-size: 0.95rem;
+}
+
+.JobPage-admin-charge-value {
+  font-weight: 600;
+  color: #dd6b20;
+  font-size: 0.95rem;
+}
+
+.JobPage-country-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.JobPage-country-icon {
+  color: #667eea;
+  font-size: 1rem;
+}
+
+.JobPage-date-cell {
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+/* Status Badge */
+.JobPage-status-badge {
+  display: inline-block;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.JobPage-status-active {
+  background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+  color: #22543d;
+}
+
+/* Action Buttons */
+.JobPage-action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.JobPage-edit-btn {
+  background: linear-gradient(135deg, #ed8936, #dd6b20) !important;
+  border: none !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.JobPage-edit-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(237, 137, 54, 0.3) !important;
+}
+
+.JobPage-delete-btn {
+  background: linear-gradient(135deg, #f56565, #e53e3e) !important;
+  border: none !important;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.JobPage-delete-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 25px rgba(245, 101, 101, 0.3) !important;
+}
+
+/* Dialog Styles */
+.JobPage-dialog .p-dialog-header {
+  background: linear-gradient(135deg, #4facfe, #00f2fe) !important;
+  color: white !important;
+  border-radius: 20px 20px 0 0 !important;
+  padding: 1.5rem 2rem !important;
+  border: none !important;
+}
+
+.JobPage-dialog .p-dialog-content {
+  background: white !important;
+  border-radius: 0 0 20px 20px !important;
+  padding: 2rem !important;
+  border: none !important;
+}
+
+.JobPage-dialog .p-dialog {
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.15) !important;
+}
+
+.JobPage-dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.JobPage-dialog-icon {
+  font-size: 1.3rem;
+}
+
+/* Form Styles */
+.JobPage-form-container {
+  padding: 0;
+}
+
+.JobPage-form-field {
+  margin-bottom: 2rem;
+}
+
+.JobPage-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.JobPage-form-label {
+  display: block;
+  margin-bottom: 0.8rem;
+  color: #2d3748;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.JobPage-required {
+  color: #e53e3e;
+}
+
+.JobPage-form-input {
+  width: 100% !important;
+  padding: 1rem !important;
+  border-radius: 12px !important;
+  border: 2px solid #e2e8f0 !important;
+  font-size: 1rem !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background: #f8fafc !important;
+}
+
+
+.JobPage-form-input-error {
+  border-color: #e53e3e !important;
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1) !important;
+}
+
+.JobPage-form-dropdown {
+  width: 100% !important;
+  border-radius: 12px !important;
+  border: 2px solid #e2e8f0 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  background: #f8fafc !important;
+}
+
+.JobPage-form-dropdown:not(.p-disabled):hover {
+  border-color: #cbd5e0 !important;
+}
+
+
+.JobPage-error-message {
+  color: #e53e3e !important;
+  font-size: 0.875rem !important;
+  margin-top: 0.5rem !important;
+  display: block !important;
+}
+
+.JobPage-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.JobPage-cancel-btn {
+  padding: 0.8rem 1.5rem !important;
+  font-weight: 600 !important;
+  color: #718096 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.JobPage-cancel-btn:hover {
+  background: #f7fafc !important;
+  color: #4a5568 !important;
+}
+
+.JobPage-save-btn {
+  background: linear-gradient(135deg, #4facfe, #00f2fe) !important;
+  border: none !important;
+  padding: 0.8rem 2rem !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.JobPage-save-btn:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3) !important;
+}
+
+.JobPage-save-btn:disabled {
+  background: #cbd5e0 !important;
+  color: #a0aec0 !important;
+  cursor: not-allowed !important;
+}
+
+/* Toast Container */
+.JobPage-toast-container {
+  z-index: 10000;
+}
+
+/* Pagination Styles */
+.JobPage-datatable .p-paginator {
+  background: linear-gradient(135deg, #f7fafc, #edf2f7) !important;
+  border: none !important;
+  padding: 1rem !important;
+  border-radius: 0 0 15px 15px !important;
+}
+
+.JobPage-datatable .p-paginator .p-paginator-pages .p-paginator-page {
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #4a5568 !important;
+  margin: 0 2px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.JobPage-datatable .p-paginator .p-paginator-pages .p-paginator-page:hover {
+  background: #4facfe !important;
+  color: white !important;
+  border-color: #4facfe !important;
+}
+
+.JobPage-datatable .p-paginator .p-paginator-pages .p-paginator-page.p-highlight {
+  background: linear-gradient(135deg, #4facfe, #00f2fe) !important;
+  color: white !important;
+  border-color: #4facfe !important;
+}
+
+/* Loading Overlay */
+.JobPage-datatable .p-datatable-loading-overlay {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(5px) !important;
+}
+
+/* Enhanced Table Features */
+.JobPage-datatable .p-column-filter-menu-button {
+  color: white !important;
+}
+
+.JobPage-datatable .p-sortable-column-icon {
+  color: white !important;
+}
+
+.JobPage-datatable .p-sortable-column:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.JobPage-datatable .p-column-filter-row .p-column-filter-element input {
+  border-radius: 8px !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* Dropdown Menu Styles */
+.JobPage-form-dropdown .p-dropdown-panel {
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1) !important;
+  margin-top: 5px !important;
+}
+
+.JobPage-form-dropdown .p-dropdown-panel .p-dropdown-items .p-dropdown-item {
+  padding: 0.8rem 1rem !important;
+  transition: all 0.3s ease !important;
+}
+
+.JobPage-form-dropdown .p-dropdown-panel .p-dropdown-items .p-dropdown-item:hover {
+  background: linear-gradient(135deg, #f7fafc, #edf2f7) !important;
+  color: #2d3748 !important;
+}
+
+.JobPage-form-input .p-inputnumber-input {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.JobPage-form-input.p-inputnumber {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.JobPage-form-input.p-inputnumber .p-inputnumber-button-group {
+  display: none !important;
+}

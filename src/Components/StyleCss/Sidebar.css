@@ -8,9 +8,11 @@
   overflow-x: hidden;
   position: fixed;
   margin-top: 60px;
+  z-index: 10000;
 }
 .admin-sidebar.open {
   width: 200px;
+  z-index: 10000;
 }
 .admin-logo {
   text-align: center;

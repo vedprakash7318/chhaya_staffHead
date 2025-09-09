@@ -17,6 +17,7 @@ import 'primeicons/primeicons.css';
 import '../CSS/Leads.css';
 
 function Leads() {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [leads, setLeads] = useState([]);
   const [globalFilter, setGlobalFilter] = useState('');
   const [selectedLeads, setSelectedLeads] = useState([]);
@@ -29,14 +30,18 @@ function Leads() {
 
   const StaffHeadId = localStorage.getItem('staffHeadID');
   const navigate = useNavigate();
-
+    useEffect(()=>{
+    if(!localStorage.getItem('staffHeadID')){
+      navigate('/')
+    }
+  })
   const fetchLeads = async () => {
     try {
       setLoading(true);
       const page = lazyParams.page + 1;
       const limit = lazyParams.rows;
 
-      const res = await axios.get(`http://localhost:5000/api/contact/get-transferredTo-leads/${StaffHeadId}`, {
+      const res = await axios.get(`${API_URL}/api/contact/get-transferredTo-leads/${StaffHeadId}`, {
         params: {
           page,
           limit,
@@ -55,7 +60,7 @@ function Leads() {
 
   const fetchCallingTeam = async () => {
     try {
-      const res = await axios.get(`http://localhost:5000/api/calling-team/get-by-addedBy/${StaffHeadId}`);
+      const res = await axios.get(`${API_URL}/api/calling-team/get-by-addedBy/${StaffHeadId}`);
       setCallingTeam(res.data);
     } catch (error) {
       toast.error('Failed to fetch calling team');
@@ -82,7 +87,7 @@ function Leads() {
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/contact/assign-leads', assignmentData);
+      const response = await axios.post(`${API_URL}/api/contact/assign-leads`, assignmentData);
       toast.success(response.data.message);
       setAssignDialogVisible(false);
       setSelectedCallingTeam(null);
@@ -99,7 +104,7 @@ function Leads() {
     };
 
     try {
-      const response = await axios.post('http://localhost:5000/api/contact/deassign-leads', deassignmentData);
+      const response = await axios.post(`${API_URL}/api/contact/deassign-leads`, deassignmentData);
       toast.success(response.data.message);
       setSelectedLeads([]);
       fetchLeads();
@@ -120,7 +125,6 @@ function Leads() {
         />
       </div>
       <div className="header-right">
-        <Button onClick={() => navigate('/add-contact')} icon="pi pi-plus" label="Add New Contacts" className="action-button" />
         <>
           <Button
             label="Assign"

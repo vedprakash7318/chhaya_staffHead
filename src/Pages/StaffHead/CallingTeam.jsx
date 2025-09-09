@@ -13,6 +13,7 @@ import 'primereact/resources/themes/lara-light-blue/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import '../CSS/CallingTeam.css'
+import { useNavigate } from 'react-router-dom';
 
 const genderOptions = [
   { label: 'Male', value: 'Male' },
@@ -20,6 +21,7 @@ const genderOptions = [
 ];
 
 const CallingTeam = () => {
+const API_URL = import.meta.env.VITE_API_URL;
   const [team, setTeam] = useState([]);
   const [visible, setVisible] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -35,10 +37,16 @@ const CallingTeam = () => {
     addedBy: staffHeadID
   });
 
+  const navigate = useNavigate();
+    useEffect(()=>{
+    if(!localStorage.getItem('staffHeadID')){
+      navigate('/')
+    }
+  })
   // Fetch all members
   const fetchData = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/calling-team/all');
+      const res = await axios.get(`${API_URL}/api/calling-team/get-by-addedBy/${staffHeadID}`);
       setTeam(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       toast.error('Failed to fetch data');
@@ -53,10 +61,10 @@ const CallingTeam = () => {
   const handleSubmit = async () => {
     try {
       if (editingId) {
-        await axios.put(`http://localhost:5000/api/calling-team/update/${editingId}`, form);
+        await axios.put(`${API_URL}/api/calling-team/update/${editingId}`, form);
         toast.success('Updated successfully!');
       } else {
-        await axios.post('http://localhost:5000/api/calling-team/add', form);
+        await axios.post(`${API_URL}/api/calling-team/add`, form);
         toast.success('Added successfully!');
       }
       setVisible(false);
@@ -100,7 +108,7 @@ const CallingTeam = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:5000/api/calling-team/delete/${id}`);
+          await axios.delete(`${API_URL}/api/calling-team/delete/${id}`);
           toast.success('Deleted successfully!');
           fetchData();
         } catch {
@@ -143,7 +151,6 @@ const CallingTeam = () => {
       <DataTable
         value={team}
         paginator rows={10}
-        rowsPerPageOptions={[5,10,20]}
         responsiveLayout="scroll"
         stripedRows
         className='dataTable-calling'

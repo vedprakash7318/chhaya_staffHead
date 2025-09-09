@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import './StyleCss/Sidebar.css';
-import {
-  FaHome, FaImage,FaUserTie,
-  FaChevronDown, FaChevronRight, FaFilm, FaVideoSlash, FaYoutube
+import {FaChevronDown, FaChevronRight, FaUserAlt,FaPhoneVolume 
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
+import { MdDashboard } from 'react-icons/md';
 
 export default function Sidebar({ isOpen }) {
   const [videoDropdownOpen, setVideoDropdownOpen] = useState(false);
@@ -12,12 +11,12 @@ export default function Sidebar({ isOpen }) {
   const navigate = useNavigate();
 
   const menu = [
-    { icon: <FaHome />, label: 'Dashboard', path: '/dashboard' },
-    { icon: <FaImage />, label: 'Calling Team', path: '/calling-team' },
+    { icon: <MdDashboard />, label: 'Dashboard', path: '/dashboard' },
+    { icon: <FaPhoneVolume />, label: 'Calling Team', path: '/calling-team' },
     {
-      icon: <FaUserTie />, label: 'Leads', dropdown: [
-        { label: 'Total Leads', icon: <FaFilm />, path: '/Leads/view-leads' },
-        { label: 'Review Leads', icon: <FaYoutube />, path: '/Leads/ReviewForm' },
+      icon: <FaUserAlt  />, label: 'Leads', dropdown: [
+        { label: 'Total Leads', icon: <FaUserAlt  />, path: '/Leads/view-leads' },
+        { label: 'Review Leads', icon: <FaUserAlt  />, path: '/Leads/ReviewForm' },
       ]
     },
 

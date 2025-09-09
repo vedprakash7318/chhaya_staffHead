@@ -8,6 +8,8 @@ import Leads from './Pages/StaffHead/Leads'
 import ReviewForm from './Pages/StaffHead/ReviewForms';
 import ReviewFormFull from './Pages/StaffHead/ReviewFomFull';
 import Mainpage from './Pages/StaffHead/Mainpage'
+
+import JobPage from './Pages/StaffHead/JobPage';
 function App() {
   return (
     <>
@@ -25,6 +27,13 @@ function App() {
       <Route path="/calling-team" element={
           <Dashboard>
             <CallingTeam />
+          </Dashboard>
+        } />
+
+  
+      <Route path="/job" element={
+          <Dashboard>
+            <JobPage />
           </Dashboard>
         } />
 

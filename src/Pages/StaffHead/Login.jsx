@@ -12,6 +12,7 @@ import 'primereact/resources/primereact.min.css';
 import '../CSS/Login.css';
 
 const Login = () => {
+    const API_URL = import.meta.env.VITE_API_URL;
   const [form, setForm] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -25,12 +26,15 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://localhost:5000/api/staff-heads/login', form);      
+      const response = await axios.post(`${API_URL}/api/staff-heads/login`, form);      
       if (response.data?.user) {
         toast.success('Login successful!');
+        
         const StaffHeadId=response.data.user.id
+        const AdminID=response.data.user.addedBy
         // Optional: Store user info (not token)
         localStorage.setItem('staffHeadID',StaffHeadId);
+        localStorage.setItem('AdminID',AdminID);
 
         setTimeout(() => navigate('/calling-team'), 2000);
       } else {

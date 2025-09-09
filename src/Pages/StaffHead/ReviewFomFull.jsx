@@ -2,14 +2,26 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../CSS/ReviewFormFull.css';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ReviewFormFull = () => {
+  const API_URL = import.meta.env.VITE_API_URL;
   const [data, setData] = useState(null);
   const [editData, setEditData] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  const [visible, setVisible] = useState(false);
+  const [countries, setCountries] = useState([]);
+  const [jobs, setJobs] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(null);
+
+  const [options, setOptions] = useState([]);
+  const [optionsLoading, setOptionsLoading] = useState(false);
+  const [optionsError, setOptionsError] = useState(null);
 
   // States for Pre-Visa Officer functionality
   const [showPreVisaPopup, setShowPreVisaPopup] = useState(false);
@@ -26,6 +38,56 @@ const ReviewFormFull = () => {
   const id = state?._id;
 
   useEffect(() => {
+    if (!localStorage.getItem('staffHeadID')) {
+      navigate('/')
+    }
+  })
+
+  // Check if there's a pending request (request sent but no response)
+  const hasPendingRequest = options.some(option =>
+    option.requestedTo && !option.responseMessage
+  );
+
+  useEffect(() => {
+    if (id) {
+      fetchOptions();
+    }
+  }, [id]);
+
+  useEffect(() => {
+    if (visible) {
+      axios.get(`${API_URL}/api/countries/`)
+        .then((res) => {
+          setCountries(res.data); 
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [visible]);
+
+  useEffect(() => {
+    if (selectedCountry) {
+      axios.get(`${API_URL}/api/jobs/${selectedCountry._id}`)
+        .then((res) => {
+          setJobs(res.data);
+        })
+        .catch((err) => console.error(err));
+    }
+  }, [selectedCountry]);
+
+  const fetchOptions = async () => {
+    setOptionsLoading(true);
+    try {
+      const res = await axios.get(`${API_URL}/api/options/optionGet/${id}`);
+      setOptions(res.data.data);
+    } catch (err) {
+      console.error('Error fetching options:', err);
+      setOptionsError('Failed to load options');
+    } finally {
+      setOptionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     if (!state) {
       navigate('/leads');
       return;
@@ -33,7 +95,7 @@ const ReviewFormFull = () => {
 
     const fetchData = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/client-form/getbyid/${id}`);
+        const res = await axios.get(`${API_URL}/api/client-form/getbyid/${id}`);
         setData(res.data);
         setEditData(res.data);
       } catch (err) {
@@ -53,7 +115,7 @@ const ReviewFormFull = () => {
       const fetchPreVisaOfficers = async () => {
         try {
           setRequestError(null);
-          const response = await axios.get('http://localhost:5000/api/pre-visa');
+          const response = await axios.get(`${API_URL}/api/pre-visa`);
           setPreVisaOfficers(response.data);
         } catch (err) {
           console.error('Error fetching pre-visa officers:', err);
@@ -99,14 +161,33 @@ const ReviewFormFull = () => {
     setError(null);
 
     try {
-      const res = await axios.put(`http://localhost:5000/api/client-form/update/${data._id}`, editData);
+      const res = await axios.put(`${API_URL}/api/client-form/update/${data._id}`, editData);
       setData(res.data.data);
       setEditData(res.data.data);
       setIsEditing(false);
-      alert('Registration updated successfully!');
+      toast.success("Updated successfully!", { 
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     } catch (err) {
       console.error('Error updating registration:', err);
       setError(err.response?.data?.message || 'Failed to update registration');
+      toast.error("Failed to update!", { 
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     } finally {
       setSaving(false);
     }
@@ -147,7 +228,7 @@ const ReviewFormFull = () => {
       const formId = data._id;
       const preVisaOfficerId = selectedOfficer._id;
 
-      const response = await axios.post('http://localhost:5000/api/options/add', {
+      const response = await axios.post(`${API_URL}/api/options/add`, {
         staffheadId,
         formId,
         preVisaOfficerId,
@@ -155,12 +236,35 @@ const ReviewFormFull = () => {
       });
 
       setRequestSuccess('Request sent successfully!');
+      fetchOptions();
+      
+      toast.success("Request sent successfully!", { 
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+      
       setTimeout(() => {
         setShowPreVisaPopup(false);
-      }, 1500);
+      }, 1000);
     } catch (err) {
       console.error('Error sending request:', err);
       setRequestError(err.response?.data?.message || 'Failed to send request');
+      toast.error("Failed to send request!", { 
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
     } finally {
       setRequestLoading(false);
     }
@@ -179,6 +283,16 @@ const ReviewFormFull = () => {
 
   return (
     <div className="form-container">
+      {/* Back Button */}
+      <div className="navigation-header">
+        <button 
+          className="back-button"
+          onClick={() => navigate('/Leads/ReviewForm')}
+        >
+          ← Back to Leads
+        </button>
+      </div>
+
       {/* Pre-Visa Officer Popup */}
       {showPreVisaPopup && (
         <div className="popup-overlay">
@@ -503,30 +617,6 @@ const ReviewFormFull = () => {
           </div>
 
           <div className="form-group">
-            <label>Expected Salary:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.expectedSalary || ''}
-                onChange={(e) => handleInputChange('expectedSalary', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.expectedSalary}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Medical Report:</label>
-            <div className="form-control">{data.medicalReport}</div>
-          </div>
-
-          <div className="form-group">
-            <label>Interview Status:</label>
-            <div className="form-control">{data.InterviewStatus}</div>
-          </div>
-
-          <div className="form-group">
             <label>PCC Status:</label>
             {isEditing ? (
               <input
@@ -539,6 +629,47 @@ const ReviewFormFull = () => {
               <div className="form-control">{data.pccStatus}</div>
             )}
           </div>
+
+          <div className="form-group">
+            <label>Expected Salary:</label>
+            {isEditing ? (
+              <input
+                readOnly
+                type="text"
+                className="form-control editable-input"
+                value={editData.expectedSalary || ''}
+                onChange={(e) => handleInputChange('expectedSalary', e.target.value)}
+              />
+            ) : (
+              <div className="form-control">{data.expectedSalary}</div>
+            )}
+          </div>
+
+
+          <div className="form-group">
+            <label>Medical Report:</label>
+            <div className="form-control">{data.medicalReport}</div>
+          </div>
+
+          <div className="form-group">
+            <label>Interview Status:</label>
+            <div className="form-control">{data.InterviewStatus}</div>
+          </div>
+
+
+
+          <div className="form-group">
+            <label>First Service Charge :</label>
+            <div className="form-control">{data.ServiceChargeByTeam}</div>
+          </div>
+
+          <div className="form-group">
+            <label>Medical Charge:</label>
+            <div className="form-control">{data.officeConfirmation?.MedicalCharge}</div>
+          </div>
+
+
+
         </div>
       </section>
 
@@ -554,16 +685,6 @@ const ReviewFormFull = () => {
           </div>
 
           <div className="form-group">
-            <label>Country:</label>
-            <div className="form-control">{data.officeConfirmation?.country.countryName}</div>
-          </div>
-
-          <div className="form-group">
-            <label>Work:</label>
-            <div className="form-control">{data.officeConfirmation?.work.jobTitle}</div>
-          </div>
-
-          <div className="form-group">
             <label>Salary: </label>
             <div className="form-control">{data.officeConfirmation?.salary}</div>
           </div>
@@ -572,12 +693,131 @@ const ReviewFormFull = () => {
             <label>Service Charge:</label>
             <div className="form-control">{data.officeConfirmation?.ServiceCharge}</div>
           </div>
-
-          <div className="form-group">
-            <label>Medical Charge:</label>
-            <div className="form-control">{data.officeConfirmation?.MedicalCharge}</div>
-          </div>
         </div>
+      </section>
+
+      {/* OPTIONS SECTION */}
+      <section className="form-section options-section">
+        <h4 className="section-title">
+          <span className="section-bullet">•</span> Options
+        </h4>
+        {optionsLoading ? (
+          <div className="loading-spinner">Loading options...</div>
+        ) : optionsError ? (
+          <div className="error-message">{optionsError}</div>
+        ) : options.length > 0 ? (
+          <div className="options-grid">
+            {options.map((option, index) => (
+              <div key={option._id} className="option-item">
+                {/* Header */}
+                <div className="option-header">
+                  <span className="option-sr-no">Option {index + 1}</span>
+                  <span className="option-date">
+                    Created: {new Date(option.createdAt).toLocaleDateString('en-US', {
+                      day: 'numeric',
+                      month: 'short',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+
+                <div className="option-details">
+                  {/* User Info Section */}
+                  <div className="user-info-section">
+                    <div className="user-info-item">
+                      <label>👤 Requested By: </label>
+                      <span className="name">{option.requestedBy?.name || 'N/A'}</span>
+                    </div>
+                    <div className="user-info-item">
+                      <label>👤 Requested To: </label>
+                      <span className="name">{option?.requestedTo?.name || 'N/A'}</span>
+                    </div>
+                  </div>
+
+                  {/* Request Message */}
+                  {option?.requestMessage && (
+                    <div className="message-section">
+                      <label>💬 Request Message:</label>
+                      <div className="message-content">
+                        {option?.requestMessage}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Job Details Section */}
+                  {option?.options && (
+                    <div className="job-details-section">
+                      <div className="job-details-header">
+                        💼 Job Details
+                      </div>
+                      <div className="job-details-grid">
+                        <div className="job-detail-item">
+                          <label>Job Title:</label>
+                          <span className="value">{option?.options?.jobTitle || 'N/A'}</span>
+                        </div>
+
+                        {option?.options?.salary && (
+                          <div className="job-detail-item">
+                            <label>Salary:</label>
+                            <span className="value">₹{option?.options?.salary}</span>
+                          </div>
+                        )}
+
+                        {option?.options?.workTime && (
+                          <div className="job-detail-item">
+                            <label>Work Time:</label>
+                            <span className="value">{option?.options?.workTime}</span>
+                          </div>
+                        )}
+                        {option?.options?.country && (
+                          <div className="job-detail-item">
+                            <label>Country:</label>
+                            <span className="value">{option?.options?.country?.countryName}</span>
+                          </div>
+                        )}
+
+                        {option?.options?.serviceCharge && (
+                          <div className="job-detail-item">
+                            <label>Service Charge:</label>
+                            <span className="value">₹{option?.options?.serviceCharge}</span>
+                          </div>
+                        )}
+
+                        {option?.options?.adminCharge && (
+                          <div className="job-detail-item">
+                            <label>Admin Charge:</label>
+                            <span className="value">₹{option?.options?.adminCharge}</span>
+                          </div>
+                        )}
+
+                        {option?.options?.description && (
+                          <div className="job-detail-item job-description">
+                            <label>Description:</label>
+                            <div className="value">{option?.options?.description}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Response Message */}
+                  {option?.responseMessage && (
+                    <div className="response-section">
+                      <label>💭 Response Message:</label>
+                      <div className="message-content">
+                        {option?.responseMessage}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="no-options">No options available</div>
+        )}
       </section>
 
       <div className="form-footer">
@@ -589,9 +829,13 @@ const ReviewFormFull = () => {
             <button className="edit-button" onClick={handleEdit}>
               Edit
             </button>
-            {/* New Button for Pre-Visa Officer Request */}
-            <button className="pre-visa-request-button" onClick={handleOpenPreVisaPopup}>
-              Request to Pre-Visa Officer
+            {/* Modified Button for Pre-Visa Officer Request */}
+            <button
+              className="pre-visa-request-button"
+              onClick={handleOpenPreVisaPopup}
+              disabled={hasPendingRequest}
+            >
+              {hasPendingRequest ? 'Request Pending...' : 'Request to Pre-Visa Officer'}
             </button>
           </>
         ) : (
