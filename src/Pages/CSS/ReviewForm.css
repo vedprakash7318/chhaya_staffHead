@@ -5,6 +5,10 @@
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
+.model-dropdown{
+  width: 100%;
+  margin-top: 10px;
+}
 
 .reviewLeads-page-title {
   font-size: 1.5rem;

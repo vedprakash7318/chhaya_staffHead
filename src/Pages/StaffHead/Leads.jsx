@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
@@ -9,6 +9,7 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Dropdown } from 'primereact/dropdown';
 import { useNavigate } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 import 'react-toastify/dist/ReactToastify.css';
 import 'primereact/resources/themes/lara-light-blue/theme.css';
@@ -27,14 +28,21 @@ function Leads() {
   const [selectedCallingTeam, setSelectedCallingTeam] = useState(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [lazyParams, setLazyParams] = useState({ first: 0, rows: 10, page: 0 });
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [deassignLoading, setDeassignLoading] = useState(false);
+  const [callingTeamLoading, setCallingTeamLoading] = useState(false);
+  const [searchTimeout, setSearchTimeout] = useState(null);
 
+  const searchInputRef = useRef(null);
   const StaffHeadId = localStorage.getItem('staffHeadID');
   const navigate = useNavigate();
-    useEffect(()=>{
-    if(!localStorage.getItem('staffHeadID')){
-      navigate('/')
+  
+  useEffect(() => {
+    if (!localStorage.getItem('staffHeadID')) {
+      navigate('/');
     }
-  })
+  }, [navigate]);
+
   const fetchLeads = async () => {
     try {
       setLoading(true);
@@ -60,17 +68,44 @@ function Leads() {
 
   const fetchCallingTeam = async () => {
     try {
+      setCallingTeamLoading(true);
       const res = await axios.get(`${API_URL}/api/calling-team/get-by-addedBy/${StaffHeadId}`);
       setCallingTeam(res.data);
     } catch (error) {
       toast.error('Failed to fetch calling team');
+    } finally {
+      setCallingTeamLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLeads();
-    fetchCallingTeam();
+    // Clear previous timeout
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+    
+    // Set new timeout for search
+    const timeout = setTimeout(() => {
+      fetchLeads();
+    }, 500); // 500ms delay for search
+    
+    setSearchTimeout(timeout);
+    
+    return () => {
+      if (searchTimeout) {
+        clearTimeout(searchTimeout);
+      }
+    };
   }, [lazyParams, globalFilter]);
+
+  useEffect(() => {
+    fetchCallingTeam();
+  }, []);
+
+  const handleSearchChange = (e) => {
+    setGlobalFilter(e.target.value);
+    setLazyParams({ ...lazyParams, first: 0, page: 0 }); // Reset to first page when searching
+  };
 
   const srNoTemplate = (rowData, { rowIndex }) => lazyParams.first + rowIndex + 1;
 
@@ -87,6 +122,7 @@ function Leads() {
     };
 
     try {
+      setAssignLoading(true);
       const response = await axios.post(`${API_URL}/api/contact/assign-leads`, assignmentData);
       toast.success(response.data.message);
       setAssignDialogVisible(false);
@@ -95,21 +131,57 @@ function Leads() {
       fetchLeads();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to assign leads');
+    } finally {
+      setAssignLoading(false);
     }
   };
 
   const handleDeassign = async () => {
+    // SweetAlert confirmation dialog before deassigning
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: `You are about to deassign ${selectedLeads.length} lead(s)`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, deassign them!',
+      cancelButtonText: 'Cancel'
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
     const deassignmentData = {
       leadIds: selectedLeads.map((lead) => lead._id)
     };
 
     try {
+      setDeassignLoading(true);
       const response = await axios.post(`${API_URL}/api/contact/deassign-leads`, deassignmentData);
-      toast.success(response.data.message);
+      
+      // Show success message with SweetAlert
+      await Swal.fire({
+        title: 'Success!',
+        text: response.data.message,
+        icon: 'success',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      
       setSelectedLeads([]);
       fetchLeads();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to deassign leads');
+      // Show error message with SweetAlert
+      await Swal.fire({
+        title: 'Error!',
+        text: error.response?.data?.message || 'Failed to deassign leads',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+    } finally {
+      setDeassignLoading(false);
     }
   };
 
@@ -117,12 +189,16 @@ function Leads() {
     <div className="header-container">
       <div className="header-left">
         <h2 className="page-title">Uploaded Leads</h2>
-        <InputText
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          placeholder="Search number"
-          className="search-box"
-        />
+        <div className="search-container">
+          <InputText
+            ref={searchInputRef}
+            value={globalFilter}
+            onChange={handleSearchChange}
+            placeholder="Search number"
+            className="search-box"
+          />
+          {loading && <ProgressSpinner className="search-spinner" strokeWidth="4" />}
+        </div>
       </div>
       <div className="header-right">
         <>
@@ -131,17 +207,17 @@ function Leads() {
             icon="pi pi-user-plus"
             className="action-button success"
             onClick={() => setAssignDialogVisible(true)}
-            disabled={selectedLeads.length === 0}
+            disabled={selectedLeads.length === 0 || assignLoading || deassignLoading}
+            loading={assignLoading}
           />
           <Button
             label="Deassign"
             icon="pi pi-user-minus"
             className="action-button danger"
             onClick={handleDeassign}
-            disabled={selectedLeads.length === 0}
+            disabled={selectedLeads.length === 0 || deassignLoading || assignLoading}
+            loading={deassignLoading}
           />
-
-          
         </>
       </div>
     </div>
@@ -150,9 +226,10 @@ function Leads() {
   return (
     <div className="leads-container">
       <ToastContainer />
-      {loading ? (
+      {loading && leads.length === 0 ? (
         <div className="spinner-container">
           <ProgressSpinner />
+          <p>Loading leads...</p>
         </div>
       ) : (
         <>
@@ -177,6 +254,7 @@ function Leads() {
               showGridlines
               emptyMessage="No leads found"
               className="p-datatable-sm"
+              loading={loading}
             >
               <Column selectionMode="multiple" headerStyle={{ width: '3em' }} />
               <Column header="Sr No." body={srNoTemplate} />
@@ -209,23 +287,42 @@ function Leads() {
             <div className="dialog-content">
               <div className="dialog-field">
                 <label>Select Calling Team:</label>
-                <Dropdown
-                  value={selectedCallingTeam}
-                  onChange={(e) => setSelectedCallingTeam(e.value)}
-                  options={callingTeam}
-                  optionLabel="name"
-                  placeholder="Select..."
-                  filter
-                  showClear
-                  className="w-full"
-                />
+                {callingTeamLoading ? (
+                  <div className="dropdown-loading">
+                    <ProgressSpinner strokeWidth="4" />
+                    <span>Loading team members...</span>
+                  </div>
+                ) : (
+                  <Dropdown
+                    value={selectedCallingTeam}
+                    onChange={(e) => setSelectedCallingTeam(e.value)}
+                    options={callingTeam}
+                    optionLabel="name"
+                    placeholder="Select..."
+                    filter
+                    showClear
+                    className="w-full"
+                  />
+                )}
               </div>
               <div className="dialog-info">
                 <p>Total selected leads: <strong>{selectedLeads.length}</strong></p>
               </div>
               <div className="dialog-actions">
-                <Button label="Cancel" icon="pi pi-times" className="p-button-secondary" onClick={() => setAssignDialogVisible(false)} />
-                <Button label="Assign" icon="pi pi-check" className="p-button-success" onClick={handleAssign} />
+                <Button 
+                  label="Cancel" 
+                  icon="pi pi-times" 
+                  className="p-button-secondary" 
+                  onClick={() => setAssignDialogVisible(false)} 
+                  disabled={assignLoading}
+                />
+                <Button 
+                  label="Assign" 
+                  icon="pi pi-check" 
+                  className="p-button-success" 
+                  onClick={handleAssign} 
+                  loading={assignLoading}
+                />
               </div>
             </div>
           </Dialog>
