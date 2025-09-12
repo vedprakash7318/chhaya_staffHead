@@ -1,7 +1,6 @@
 .admin-sidebar {
   width: 85px;
   background: #fff;
-  padding: 0;
   transition: width 0.3s ease;
   height: 100vh;
   overflow-y: auto;
@@ -10,21 +9,9 @@
   margin-top: 60px;
   z-index: 10000;
 }
+
 .admin-sidebar.open {
   width: 200px;
-  z-index: 10000;
-}
-.admin-logo {
-  text-align: center;
-  font-size: 28px;
-  cursor: pointer;
-  position: sticky;
-  top: 0;
-  background: #fff;
-  border-radius: 10px;
-  margin-left: 10px;
-  z-index: 1;
-  padding: 10px 0;
 }
 
 .admin-sidebar ul {
@@ -34,17 +21,19 @@
   margin-left: 10px;
 }
 
-.admin-sidebar li {
+.sidebar-item {
   display: flex;
   align-items: center;
   padding: 12px 20px;
+  margin-top: 20px;
   cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
 }
 
-.admin-sidebar li:hover {
+.sidebar-item:hover {
   background: #D1D6E0;
+  border-radius: 10px;
 }
 
 .admin-icon {
@@ -69,6 +58,7 @@
   transition: max-height 0.3s ease-out;
   width: 100%;
   padding-left: 20px;
+  
 }
 
 .dropdown-menu.open {
@@ -79,20 +69,29 @@
 .dropdown-item {
   padding-left: 30px !important;
   transition: background 0.2s ease;
+  margin-top: 7px;
 }
 
 .dropdown-item:hover {
   background: #C1C6D0 !important;
+  border-radius:10px ;
 }
 
-/* Show labels when either open or hovered */
-.admin-sidebar.open .admin-label{
+/* Active state */
+.sidebar-item.active,
+.dropdown-item.active {
+  background: #B0B5C1;
+  font-weight: bold;
+  color: #0d53c4;
+  border-radius: 10px;
+}
+
+/* Show labels when sidebar open */
+.admin-sidebar.open .admin-label {
   opacity: 1;
 }
 
-
-
-/* Full screen on mobile */
+/* Mobile responsive */
 @media (max-width: 768px) {
   .admin-sidebar {
     transform: translateX(-100%);

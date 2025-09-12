@@ -1,25 +1,23 @@
 import React, { useState } from 'react';
 import './StyleCss/Sidebar.css';
-import {FaChevronDown, FaChevronRight, FaUserAlt,FaPhoneVolume 
-} from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { FaChevronDown, FaChevronRight, FaUserAlt, FaPhoneVolume } from 'react-icons/fa';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { MdDashboard } from 'react-icons/md';
 
 export default function Sidebar({ isOpen }) {
   const [videoDropdownOpen, setVideoDropdownOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation(); // to track current route
 
   const menu = [
     { icon: <MdDashboard />, label: 'Dashboard', path: '/dashboard' },
     { icon: <FaPhoneVolume />, label: 'Calling Team', path: '/calling-team' },
     {
-      icon: <FaUserAlt  />, label: 'Leads', dropdown: [
-        { label: 'Total Leads', icon: <FaUserAlt  />, path: '/Leads/view-leads' },
-        { label: 'Review Leads', icon: <FaUserAlt  />, path: '/Leads/ReviewForm' },
+      icon: <FaUserAlt />, label: 'Leads', dropdown: [
+        { label: 'Total Leads', icon: <FaUserAlt />, path: '/Leads/view-leads' },
+        { label: 'Review Leads', icon: <FaUserAlt />, path: '/Leads/ReviewForm' },
       ]
     },
-
   ];
 
   const handleItemClick = (item) => {
@@ -30,16 +28,18 @@ export default function Sidebar({ isOpen }) {
     }
   };
 
+  // Function to check active state
+  const isActive = (path) => location.pathname === path;
+
   return (
-    <div
-      className={`admin-sidebar ${isOpen ? 'open' : 'collapsed'}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className={`admin-sidebar ${isOpen ? 'open' : 'collapsed'}`}>
       <ul>
         {menu.map((item, i) => (
           <div key={i}>
-            <li onClick={() => handleItemClick(item)} className="sidebar-item">
+            <li
+              onClick={() => handleItemClick(item)}
+              className={`sidebar-item ${item.path && isActive(item.path) ? 'active' : ''}`}
+            >
               <span className="admin-icon">{item.icon}</span>
               <span className="admin-label">{item.label}</span>
               {item.dropdown && (
@@ -55,7 +55,7 @@ export default function Sidebar({ isOpen }) {
                 {item.dropdown.map((subItem, subIndex) => (
                   <li
                     key={subIndex}
-                    className="dropdown-item"
+                    className={`dropdown-item ${isActive(subItem.path) ? 'active' : ''}`}
                     onClick={() => navigate(subItem.path)}
                   >
                     <span className="admin-icon">{subItem.icon}</span>
