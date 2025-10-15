@@ -3,6 +3,9 @@ import axios from 'axios';
 import '../CSS/ReviewFormFull.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
+import AddOptionPage from './AddOption';
 
 const ReviewFormFull = () => {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -10,86 +13,88 @@ const ReviewFormFull = () => {
   const [editData, setEditData] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-
-  const [visible, setVisible] = useState(false);
-  const [countries, setCountries] = useState([]);
-  const [jobs, setJobs] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [selectedJob, setSelectedJob] = useState(null);
-
+  const [showAdd, setShowAdd] = useState(false);
+  
   const [options, setOptions] = useState([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
-  const [optionsError, setOptionsError] = useState(null);
+  
+  const [optionsByYou, setOptionsByYou] = useState([]);
+  const [optionsByYouLoading, setOptionsByYouLoading] = useState(false);
 
-  // States for Pre-Visa Officer functionality
+  const [expandedPreVisaOptions, setExpandedPreVisaOptions] = useState({});
+  const [expandedYourOptions, setExpandedYourOptions] = useState({});
+
   const [showPreVisaPopup, setShowPreVisaPopup] = useState(false);
   const [preVisaOfficers, setPreVisaOfficers] = useState([]);
   const [selectedOfficer, setSelectedOfficer] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [requestLoading, setRequestLoading] = useState(false);
-  const [requestError, setRequestError] = useState(null);
-  const [requestSuccess, setRequestSuccess] = useState(null);
   const [requestMessage, setRequestMessage] = useState('');
+
+  const [isAddOptionDisabled, setIsAddOptionDisabled] = useState(false);
+  const [isTransferred, setIsTransferred] = useState(false);
 
   const { state } = useLocation();
   const navigate = useNavigate();
   const id = state?._id;
+  const staffHeadID = localStorage.getItem('staffHeadID');
+
+  const medicalReportOptions = [
+    { label: 'Fit', value: 'Fit' },
+    { label: 'Unfit', value: 'Unfit' },
+    { label: 'Pending', value: 'Pending' }
+  ];
 
   useEffect(() => {
-    if (!localStorage.getItem('staffHeadID')) {
-      navigate('/')
+    if (!staffHeadID) {
+      navigate('/');
     }
-  })
+  }, [staffHeadID, navigate]);
 
-  // Check if there's a pending request (request sent but no response)
   const hasPendingRequest = options.some(option =>
     option.requestedTo && !option.responseMessage
   );
 
   useEffect(() => {
+    setIsAddOptionDisabled(options.length > 0 || hasPendingRequest);
+  }, [options, hasPendingRequest]);
+
+  useEffect(() => {
     if (id) {
       fetchOptions();
+      fetchOptionsByYou();
     }
   }, [id]);
-
-  useEffect(() => {
-    if (visible) {
-      axios.get(`${API_URL}/api/countries/`)
-        .then((res) => {
-          setCountries(res.data); 
-        })
-        .catch((err) => console.error(err));
-    }
-  }, [visible]);
-
-  useEffect(() => {
-    if (selectedCountry) {
-      axios.get(`${API_URL}/api/jobs/${selectedCountry._id}`)
-        .then((res) => {
-          setJobs(res.data);
-        })
-        .catch((err) => console.error(err));
-    }
-  }, [selectedCountry]);
 
   const fetchOptions = async () => {
     setOptionsLoading(true);
     try {
       const res = await axios.get(`${API_URL}/api/options/optionGet/${id}`);
-      setOptions(res.data.data);
-    } catch (err) {
-      console.error('Error fetching options:', err);
-      setOptionsError('Failed to load options');
+      setOptions(res.data.data || []);
+    } catch {
+      setOptions([]);
     } finally {
       setOptionsLoading(false);
     }
   };
 
+  const fetchOptionsByYou = async () => {
+    setOptionsByYouLoading(true);
+    try {
+      const res = await axios.get(`${API_URL}/api/options-staff/optionGet/${id}`);
+      const responseData = res.data?.data || res.data;
+      setOptionsByYou(Array.isArray(responseData) ? responseData : (responseData ? [responseData] : []));
+    } catch {
+      setOptionsByYou([]);
+    } finally {
+      setOptionsByYouLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!state) {
-      navigate('/leads');
+      navigate('/ReviewForm');
       return;
     }
 
@@ -98,9 +103,14 @@ const ReviewFormFull = () => {
         const res = await axios.get(`${API_URL}/api/client-form/getbyid/${id}`);
         setData(res.data);
         setEditData(res.data);
-      } catch (err) {
-        console.error(err);
-        setError('Failed to load form data');
+        
+        // Check if file is transferred to Pre-Visa Manager
+        if (res.data.transferredToPreVisaManager) {
+          setIsTransferred(true);
+        }
+        
+      } catch {
+        setData(null);
       } finally {
         setLoading(false);
       }
@@ -109,25 +119,36 @@ const ReviewFormFull = () => {
     fetchData();
   }, [id, navigate, state]);
 
-  // Fetch Pre-Visa Officers when popup opens
   useEffect(() => {
     if (showPreVisaPopup) {
       const fetchPreVisaOfficers = async () => {
         try {
-          setRequestError(null);
           const response = await axios.get(`${API_URL}/api/pre-visa`);
-          setPreVisaOfficers(response.data);
-        } catch (err) {
-          console.error('Error fetching pre-visa officers:', err);
-          setRequestError('Failed to load pre-visa officers');
+          setPreVisaOfficers(response.data || []);
+        } catch {
+          setPreVisaOfficers([]);
         }
       };
-
       fetchPreVisaOfficers();
     }
   }, [showPreVisaPopup]);
 
+  const togglePreVisaOption = (index) => {
+    setExpandedPreVisaOptions(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
+  const toggleYourOption = (index) => {
+    setExpandedYourOptions(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
   const handleEdit = () => {
+    if (isTransferred) return;
     setIsEditing(true);
     setEditData({ ...data });
   };
@@ -135,10 +156,16 @@ const ReviewFormFull = () => {
   const handleCancel = () => {
     setIsEditing(false);
     setEditData({ ...data });
-    setError(null);
   };
 
+  const handleCloseDialog = () => {
+    setShowAdd(false);
+    fetchOptionsByYou();
+  };
+  
   const handleInputChange = (field, value) => {
+    if (isTransferred) return;
+    
     if (field.includes('.')) {
       const [parent, child] = field.split('.');
       setEditData(prev => ({
@@ -157,35 +184,23 @@ const ReviewFormFull = () => {
   };
 
   const handleSave = async () => {
+    if (isTransferred) return;
+    
     setSaving(true);
-    setError(null);
-
     try {
       const res = await axios.put(`${API_URL}/api/client-form/update/${data._id}`, editData);
       setData(res.data.data);
       setEditData(res.data.data);
       setIsEditing(false);
-      toast.success("Updated successfully!", { 
+      toast.success("Updated successfully!", {
         position: "top-right",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "light",
       });
-    } catch (err) {
-      console.error('Error updating registration:', err);
-      setError(err.response?.data?.message || 'Failed to update registration');
-      toast.error("Failed to update!", { 
+    } catch {
+      toast.error("Failed to update!", {
         position: "top-right",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "light",
       });
     } finally {
@@ -193,76 +208,49 @@ const ReviewFormFull = () => {
     }
   };
 
-  // Open Pre-Visa Officer popup
   const handleOpenPreVisaPopup = () => {
+    if (isTransferred) return;
     setShowPreVisaPopup(true);
     setSelectedOfficer(null);
     setSearchTerm('');
-    setRequestError(null);
-    setRequestSuccess(null);
     setRequestMessage('');
   };
 
-  // Close Pre-Visa Officer popup
   const handleClosePreVisaPopup = () => {
     setShowPreVisaPopup(false);
   };
 
-  // Handle officer selection
   const handleOfficerSelect = (officer) => {
     setSelectedOfficer(officer);
   };
 
-  // Send request to Pre-Visa Officer
   const handleSendRequest = async () => {
-    if (!selectedOfficer) {
-      setRequestError('Please select a Pre-Visa Officer');
-      return;
-    }
+    if (!selectedOfficer || isTransferred) return;
 
     setRequestLoading(true);
-    setRequestError(null);
-
     try {
       const staffheadId = localStorage.getItem('staffHeadID');
       const formId = data._id;
       const preVisaOfficerId = selectedOfficer._id;
 
-      const response = await axios.post(`${API_URL}/api/options/add`, {
+      await axios.post(`${API_URL}/api/options/add`, {
         staffheadId,
         formId,
         preVisaOfficerId,
         message: requestMessage
       });
 
-      setRequestSuccess('Request sent successfully!');
       fetchOptions();
-      
-      toast.success("Request sent successfully!", { 
+      toast.success("Request sent successfully!", {
         position: "top-right",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "light",
       });
-      
-      setTimeout(() => {
-        setShowPreVisaPopup(false);
-      }, 1000);
-    } catch (err) {
-      console.error('Error sending request:', err);
-      setRequestError(err.response?.data?.message || 'Failed to send request');
-      toast.error("Failed to send request!", { 
+      setTimeout(() => setShowPreVisaPopup(false), 1000);
+    } catch {
+      toast.error("Failed to send request!", {
         position: "top-right",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
         theme: "light",
       });
     } finally {
@@ -270,30 +258,85 @@ const ReviewFormFull = () => {
     }
   };
 
-  // Filter officers based on search term
+  const handleAddOption = () => {
+    if (isTransferred) return;
+    setShowAdd(true);
+  };
+
   const filteredOfficers = preVisaOfficers.filter(officer =>
-    officer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    officer.email.toLowerCase().includes(searchTerm.toLowerCase())
+    officer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    officer.email?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const renderField = (label, value, field, type = 'text') => (
+    <div className={`form-group ${isEditing ? 'editable-field' : ''} ${isTransferred ? 'transferred-field' : ''}`}>
+      <label>{label}:</label>
+      {isEditing ? (
+        type === 'select' ? (
+          <select
+            className="form-control editable-input"
+            value={editData[field] || 'Pending'}
+            onChange={(e) => handleInputChange(field, e.target.value)}
+            disabled={isTransferred}
+          >
+            {medicalReportOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={type}
+            className="form-control editable-input"
+            value={editData[field] || ''}
+            onChange={(e) => handleInputChange(field, e.target.value)}
+            disabled={field === 'expectedSalary' || isTransferred}
+          />
+        )
+      ) : (
+        <div className="form-control">{value || 'N/A'}</div>
+      )}
+    </div>
+  );
+
+  const renderOptionDetail = (label, value) => value && (
+    <div className="job-detail-item">
+      <label>{label}:</label>
+      <span className="value">{value}</span>
+    </div>
+  );
+
+  // Tooltip component for disabled buttons
+  const DisabledButtonWithTooltip = ({ children, title, ...props }) => (
+    <div className="tooltip-container">
+      <button {...props} disabled>
+        {children}
+      </button>
+      {isTransferred && (
+        <div className="tooltip-text">File has been transferred to Pre-Visa Manager</div>
+      )}
+    </div>
   );
 
   if (!state) return null;
   if (loading) return <div className="loading-spinner">Loading...</div>;
-  if (error) return <div className="error-message">{error}</div>;
   if (!data) return <div className="no-data">No data available</div>;
 
   return (
     <div className="form-container">
-      {/* Back Button */}
+      {isTransferred && (
+        <div className="transfer-banner">
+          <div className="transfer-message">
+            ⚠️ This file has been transferred to Pre-Visa Manager and is no longer editable
+          </div>
+        </div>
+      )}
+
       <div className="navigation-header">
-        <button 
-          className="back-button"
-          onClick={() => navigate('/Leads/ReviewForm')}
-        >
+        <button className="back-button" onClick={() => navigate('/ReviewForm')}>
           ← Back to Leads
         </button>
       </div>
 
-      {/* Pre-Visa Officer Popup */}
       {showPreVisaPopup && (
         <div className="popup-overlay">
           <div className="pre-visa-popup">
@@ -301,7 +344,6 @@ const ReviewFormFull = () => {
               <h3>Select Pre-Visa Officer</h3>
               <button className="close-popup" onClick={handleClosePreVisaPopup}>×</button>
             </div>
-
             <div className="popup-content">
               <div className="search-box">
                 <input
@@ -311,7 +353,6 @@ const ReviewFormFull = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-
               <div className="officers-list">
                 {filteredOfficers.length > 0 ? (
                   filteredOfficers.map(officer => (
@@ -320,16 +361,14 @@ const ReviewFormFull = () => {
                       className={`officer-item ${selectedOfficer?._id === officer._id ? 'selected' : ''}`}
                       onClick={() => handleOfficerSelect(officer)}
                     >
-                      <div className="officer-name">{officer.name}</div>
-                      <div className="officer-email">{officer.email}</div>
+                      <div className="officer-name">{officer.name || 'N/A'}</div>
+                      <div className="officer-email">{officer.email || 'N/A'}</div>
                     </div>
                   ))
                 ) : (
                   <div className="no-officers">No pre-visa officers found</div>
                 )}
               </div>
-
-              {/* Message Textarea */}
               <div className="message-section">
                 <label>Message (Optional):</label>
                 <textarea
@@ -340,15 +379,11 @@ const ReviewFormFull = () => {
                   rows="4"
                 />
               </div>
-
-              {requestError && <div className="error-message">{requestError}</div>}
-              {requestSuccess && <div className="success-message">{requestSuccess}</div>}
-
               <div className="popup-actions">
                 <button
                   className="send-request-btn"
                   onClick={handleSendRequest}
-                  disabled={requestLoading || !selectedOfficer}
+                  disabled={requestLoading || !selectedOfficer || isTransferred}
                 >
                   {requestLoading ? 'Sending...' : 'Send Request'}
                 </button>
@@ -385,476 +420,305 @@ const ReviewFormFull = () => {
         <h3 className="form-title">Registration Form</h3>
         <div className="form-meta">
           <span className="form-date"><strong>Date:</strong> {new Date(data.createdAt).toLocaleDateString()}</span>
-          <span className="form-reg-no"><strong>Registration No. :- </strong>{data.regNo}</span>
+          <span className="form-reg-no"><strong>Registration No. :- </strong>{data.regNo || 'N/A'}</span>
         </div>
       </div>
 
-      {/* PERSONAL DETAILS */}
       <section className="form-section personal-details">
-        <h4 className="section-title">
-          <span className="section-bullet">•</span> Personal Details
-        </h4>
+        <h4 className="section-title"><span className="section-bullet">•</span> Personal Details</h4>
         <div className="form-grid">
-          <div className="form-group">
-            <label>Full Name:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.fullName || ''}
-                onChange={(e) => handleInputChange('fullName', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.fullName}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Father's Name:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.fatherName || ''}
-                onChange={(e) => handleInputChange('fatherName', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.fatherName}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Address:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.address || ''}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.address}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>State:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.state || ''}
-                onChange={(e) => handleInputChange('state', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.state}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>PIN Code:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.pinCode || ''}
-                onChange={(e) => handleInputChange('pinCode', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.pinCode}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>WhatsApp Number:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.whatsAppNo || ''}
-                onChange={(e) => handleInputChange('whatsAppNo', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.whatsAppNo}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Family Number:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.familyContact || ''}
-                onChange={(e) => handleInputChange('familyContact', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.familyContact}</div>
-            )}
-          </div>
+          {renderField('Full Name', data.fullName, 'fullName')}
+          {renderField('Father\'s Name', data.fatherName, 'fatherName')}
+          {renderField('Address', data.address, 'address')}
+          {renderField('State', data.state, 'state')}
+          {renderField('PIN Code', data.pinCode, 'pinCode', 'number')}
+          {renderField('WhatsApp Number', data.whatsAppNo, 'whatsAppNo', 'number')}
+          {renderField('Family Number', data.familyContact, 'familyContact', 'number')}
           <div className="form-group">
             <label>Contact Number:</label>
-            <div className="form-control">{data.contactNo}</div>
+            <div className="form-control">{data.contactNo || 'N/A'}</div>
           </div>
           <div className="form-group full-width">
             <label>Email:</label>
-            <div className="form-control">{data.email}</div>
+            <div className="form-control">{data.email || 'N/A'}</div>
           </div>
         </div>
       </section>
 
-      {/* PASSPORT DETAILS */}
       <section className="form-section passport-details">
-        <h4 className="section-title">
-          <span className="section-bullet">•</span> Passport Details
-        </h4>
+        <h4 className="section-title"><span className="section-bullet">•</span> Passport Details</h4>
         <div className="form-grid">
           <div className="form-group">
             <label>Passport Number:</label>
-            <div className="form-control">{data.passportNumber}</div>
+            <div className="form-control">{data.passportNumber || 'N/A'}</div>
           </div>
-
           <div className="form-group">
             <label>Date of Birth:</label>
-            <div className="form-control">{new Date(data.dateOfBirth).toLocaleDateString()}</div>
+            <div className="form-control">{data.dateOfBirth ? new Date(data.dateOfBirth).toLocaleDateString() : 'N/A'}</div>
           </div>
-
           <div className="form-group">
             <label>Passport Expiry Date:</label>
-            <div className="form-control">{new Date(data.passportExpiry).toLocaleDateString()}</div>
+            <div className="form-control">{data.passportExpiry ? new Date(data.passportExpiry).toLocaleDateString() : 'N/A'}</div>
           </div>
-
           <div className="form-group">
             <label>Nationality:</label>
-            <div className="form-control">{data.nationality}</div>
+            <div className="form-control">{data.nationality || 'N/A'}</div>
           </div>
-
-          <div className="form-group checkbox-group">
-            <div className="checkbox-item">
-              <input
-                type="checkbox"
-                id="ecr"
-                checked={isEditing ? (editData.ecr || false) : data.ecr}
-                onChange={isEditing ? (e) => handleInputChange('ecr', e.target.checked) : undefined}
-                readOnly={!isEditing}
-              />
-              <label htmlFor="ecr">ECR</label>
-            </div>
-            <div className="checkbox-item">
-              <input
-                type="checkbox"
-                id="ecnr"
-                checked={isEditing ? (editData.ecnr || false) : data.ecnr}
-                onChange={isEditing ? (e) => handleInputChange('ecnr', e.target.checked) : undefined}
-                readOnly={!isEditing}
-              />
-              <label htmlFor="ecnr">ECNR</label>
-            </div>
+          <div className="form-group">
+            <label>Passport Type:</label>
+            <div className="form-control">{data.passportType || 'N/A'}</div>
           </div>
         </div>
       </section>
 
-      {/* WORK DETAILS */}
       <section className="form-section work-details">
-        <h4 className="section-title">
-          <span className="section-bullet">•</span> Work Details
-        </h4>
+        <h4 className="section-title"><span className="section-bullet">•</span> Work Details</h4>
         <div className="form-grid">
-          <div className="form-group">
-            <label>Occupation:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.occupation || ''}
-                onChange={(e) => handleInputChange('occupation', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.occupation}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Place of Deployment:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.placeOfEmployment || ''}
-                onChange={(e) => handleInputChange('placeOfEmployment', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.placeOfEmployment}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Last Experience:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.lastExperience || ''}
-                onChange={(e) => handleInputChange('lastExperience', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.lastExperience}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Last Salary & Post Details:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.lastSalaryPostDetails || ''}
-                onChange={(e) => handleInputChange('lastSalaryPostDetails', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.lastSalaryPostDetails}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>PCC Status:</label>
-            {isEditing ? (
-              <input
-                type="text"
-                className="form-control editable-input"
-                value={editData.pccStatus || ''}
-                onChange={(e) => handleInputChange('pccStatus', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.pccStatus}</div>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Expected Salary:</label>
-            {isEditing ? (
-              <input
-                readOnly
-                type="text"
-                className="form-control editable-input"
-                value={editData.expectedSalary || ''}
-                onChange={(e) => handleInputChange('expectedSalary', e.target.value)}
-              />
-            ) : (
-              <div className="form-control">{data.expectedSalary}</div>
-            )}
-          </div>
-
-
-          <div className="form-group">
-            <label>Medical Report:</label>
-            <div className="form-control">{data.medicalReport}</div>
-          </div>
-
+          {renderField('Occupation', data.occupation, 'occupation')}
+          {renderField('Place of Deployment', data.placeOfEmployment, 'placeOfEmployment')}
+          {renderField('Last Experience', data.lastExperience, 'lastExperience')}
+          {renderField('Last Salary & Post Details', data.lastSalaryPostDetails, 'lastSalaryPostDetails')}
+          {renderField('PCC Status', data.pccStatus, 'pccStatus')}
+          {renderField('Expected Salary', data.expectedSalary, 'expectedSalary')}
+          {renderField('Medical Report', data.medicalReport, 'medicalReport', 'select')}
           <div className="form-group">
             <label>Interview Status:</label>
-            <div className="form-control">{data.InterviewStatus}</div>
+            <div className="form-control">{data.InterviewStatus || 'N/A'}</div>
           </div>
-
-
-
           <div className="form-group">
-            <label>First Service Charge :</label>
-            <div className="form-control">{data.ServiceChargeByTeam}</div>
+            <label>First Service Charge:</label>
+            <div className="form-control">{data.ServiceChargeByTeam || 'N/A'}</div>
           </div>
-
           <div className="form-group">
             <label>Medical Charge:</label>
-            <div className="form-control">{data.officeConfirmation?.MedicalCharge}</div>
+            <div className="form-control">{data.officeConfirmation?.MedicalCharge || 'N/A'}</div>
           </div>
-
-
-
         </div>
       </section>
 
-      {/* FOR OFFICE USE ONLY */}
       <section className="form-section office-use">
-        <h4 className="section-title">
-          <span className="section-bullet">•</span> For Office Use Only
-        </h4>
+        <h4 className="section-title"><span className="section-bullet">•</span> For Office Use Only</h4>
         <div className="form-grid">
           <div className="form-group">
             <label>Agent Code:</label>
-            <div className="form-control">{data.agentCode}</div>
+            <div className="form-control">{data.agentCode || 'N/A'}</div>
           </div>
-
           <div className="form-group">
-            <label>Salary: </label>
-            <div className="form-control">{data.officeConfirmation?.salary}</div>
+            <label>Salary:</label>
+            <div className="form-control">{data.officeConfirmation?.salary || 'N/A'}</div>
           </div>
-
           <div className="form-group">
             <label>Service Charge:</label>
-            <div className="form-control">{data.officeConfirmation?.ServiceCharge}</div>
+            <div className="form-control">{data.officeConfirmation?.ServiceCharge || 'N/A'}</div>
           </div>
         </div>
       </section>
 
-      {/* OPTIONS SECTION */}
       <section className="form-section options-section">
-        <h4 className="section-title">
-          <span className="section-bullet">•</span> Options
-        </h4>
+        <h4 className="section-title"><span className="section-bullet">•</span> Options (Pre-Visa Officer)</h4>
         {optionsLoading ? (
           <div className="loading-spinner">Loading options...</div>
-        ) : optionsError ? (
-          <div className="error-message">{optionsError}</div>
         ) : options.length > 0 ? (
-          <div className="options-grid">
+          <div className="options-accordion">
             {options.map((option, index) => (
-              <div key={option._id} className="option-item">
-                {/* Header */}
-                <div className="option-header">
-                  <span className="option-sr-no">Option {index + 1}</span>
-                  <span className="option-date">
-                    Created: {new Date(option.createdAt).toLocaleDateString('en-US', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </span>
+              <div key={option._id} className="accordion-item">
+                <div className="accordion-header" onClick={() => togglePreVisaOption(index)}>
+                  <div className="accordion-title">
+                    <span className="option-sr-no">Option {index + 1}</span>
+                    <span className="option-date">
+                      Created: {option.createdAt ? new Date(option.createdAt).toLocaleDateString('en-US', {
+                        day: 'numeric', month: 'short', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                      }) : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="accordion-icon">{expandedPreVisaOptions[index] ? '−' : '+'}</div>
                 </div>
-
-                <div className="option-details">
-                  {/* User Info Section */}
-                  <div className="user-info-section">
-                    <div className="user-info-item">
-                      <label>👤 Requested By: </label>
-                      <span className="name">{option.requestedBy?.name || 'N/A'}</span>
-                    </div>
-                    <div className="user-info-item">
-                      <label>👤 Requested To: </label>
-                      <span className="name">{option?.requestedTo?.name || 'N/A'}</span>
+                {expandedPreVisaOptions[index] && (
+                  <div className="accordion-content">
+                    <div className="option-details">
+                      <div className="user-info-section">
+                        <div className="user-info-item">
+                          <label>👤 Requested By: </label>
+                          <span className="name">{option.requestedBy?.name || 'N/A'}</span>
+                        </div>
+                        <div className="user-info-item">
+                          <label>👤 Requested To: </label>
+                          <span className="name">{option.requestedTo?.name || 'N/A'}</span>
+                        </div>
+                      </div>
+                      {option.requestMessage && (
+                        <div className="message-section">
+                          <label>💬 Request Message:</label>
+                          <div className="message-content">{option.requestMessage}</div>
+                        </div>
+                      )}
+                      {option.options && (
+                        <div className="job-details-section">
+                          <div className="job-details-header">💼 Job Details</div>
+                          <div className="job-details-grid">
+                            {renderOptionDetail('Job Title', option.options.jobTitle)}
+                            {renderOptionDetail('Salary', option.options.salary ? `₹${option.options.salary}` : null)}
+                            {renderOptionDetail('Work Time', option.options.WorkTime)}
+                            {renderOptionDetail('Country', option.options.country?.countryName)}
+                            {renderOptionDetail('Service Charge', option.options.serviceCharge ? `₹${option.options.serviceCharge}` : null)}
+                            {option.options.description && (
+                              <div className="job-detail-item job-description">
+                                <label>Description:</label>
+                                <div className="value">{option.options.description}</div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                      {option.responseMessage && (
+                        <div className="response-section">
+                          <label>💭 Response Message:</label>
+                          <div className="message-content">{option.responseMessage}</div>
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  {/* Request Message */}
-                  {option?.requestMessage && (
-                    <div className="message-section">
-                      <label>💬 Request Message:</label>
-                      <div className="message-content">
-                        {option?.requestMessage}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Job Details Section */}
-                  {option?.options && (
-                    <div className="job-details-section">
-                      <div className="job-details-header">
-                        💼 Job Details
-                      </div>
-                      <div className="job-details-grid">
-                        <div className="job-detail-item">
-                          <label>Job Title:</label>
-                          <span className="value">{option?.options?.jobTitle || 'N/A'}</span>
-                        </div>
-
-                        {option?.options?.salary && (
-                          <div className="job-detail-item">
-                            <label>Salary:</label>
-                            <span className="value">₹{option?.options?.salary}</span>
-                          </div>
-                        )}
-
-                        {option?.options?.workTime && (
-                          <div className="job-detail-item">
-                            <label>Work Time:</label>
-                            <span className="value">{option?.options?.workTime}</span>
-                          </div>
-                        )}
-                        {option?.options?.country && (
-                          <div className="job-detail-item">
-                            <label>Country:</label>
-                            <span className="value">{option?.options?.country?.countryName}</span>
-                          </div>
-                        )}
-
-                        {option?.options?.serviceCharge && (
-                          <div className="job-detail-item">
-                            <label>Service Charge:</label>
-                            <span className="value">₹{option?.options?.serviceCharge}</span>
-                          </div>
-                        )}
-
-                        {option?.options?.adminCharge && (
-                          <div className="job-detail-item">
-                            <label>Admin Charge:</label>
-                            <span className="value">₹{option?.options?.adminCharge}</span>
-                          </div>
-                        )}
-
-                        {option?.options?.description && (
-                          <div className="job-detail-item job-description">
-                            <label>Description:</label>
-                            <div className="value">{option?.options?.description}</div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Response Message */}
-                  {option?.responseMessage && (
-                    <div className="response-section">
-                      <label>💭 Response Message:</label>
-                      <div className="message-content">
-                        {option?.responseMessage}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
             ))}
           </div>
         ) : (
-          <div className="no-options">No options available</div>
+          <div className="no-options">No options given</div>
+        )}
+      </section>
+
+      <section className="form-section options-section">
+        <h4 className="section-title"><span className="section-bullet">•</span> Options By You</h4>
+        {optionsByYouLoading ? (
+          <div className="loading-spinner">Loading your options...</div>
+        ) : optionsByYou.length > 0 ? (
+          <div className="options-accordion">
+            {optionsByYou.map((option, index) => (
+              <div key={option._id || index} className="accordion-item">
+                <div className="accordion-header" onClick={() => toggleYourOption(index)}>
+                  <div className="accordion-title">
+                    <span className="option-sr-no">Your Option {index + 1}</span>
+                    <span className="option-date">
+                      Created: {option.createdAt ? new Date(option.createdAt).toLocaleDateString('en-US', {
+                        day: 'numeric', month: 'short', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                      }) : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="accordion-icon">{expandedYourOptions[index] ? '−' : '+'}</div>
+                </div>
+                {expandedYourOptions[index] && (
+                  <div className="accordion-content">
+                    <div className="option-details">
+                      <div className="job-details-section">
+                        <div className="job-details-header">💼 Your Job Details</div>
+                        <div className="job-details-grid">
+                          {renderOptionDetail('Trade/Occupation', 
+                            option.options?.jobTitle || option.jobTitle
+                          )}
+                          {renderOptionDetail('Salary', 
+                            (option.options?.salary || option.salary) ? `₹${option.options?.salary || option.salary}` : null
+                          )}
+                          {renderOptionDetail('Country', 
+                            option.options?.country?.countryName || 
+                            option.country?.countryName || 
+                            option.country?.name
+                          )}
+                          {renderOptionDetail('Duty Hours', 
+                            (option.options?.WorkTime || option.WorkTime) ? `₹${option.options?.WorkTime || option.WorkTime}` : null
+                          )}
+                          {renderOptionDetail('Service Charge', 
+                            (option.options?.serviceCharge || option.serviceCharge) ? `₹${option.options?.serviceCharge || option.serviceCharge}` : null
+                          )}
+                          {option.options?.description && (
+                            <div className="job-detail-item job-description">
+                              <label>Description:</label>
+                              <div className="value">{option.options.description}</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="no-options">No options given</div>
         )}
       </section>
 
       <div className="form-footer">
         {!isEditing ? (
           <>
-            <button className="print-button" onClick={() => window.print()}>
-              Print Form
-            </button>
-            <button className="edit-button" onClick={handleEdit}>
-              Edit
-            </button>
-            {/* Modified Button for Pre-Visa Officer Request */}
-            <button
-              className="pre-visa-request-button"
-              onClick={handleOpenPreVisaPopup}
-              disabled={hasPendingRequest}
-            >
-              {hasPendingRequest ? 'Request Pending...' : 'Request to Pre-Visa Officer'}
-            </button>
+            <button className="print-button" onClick={() => window.print()}>Print Form</button>
+            
+            {isTransferred ? (
+              <DisabledButtonWithTooltip className="edit-button">
+                Edit
+              </DisabledButtonWithTooltip>
+            ) : (
+              <button className="edit-button" onClick={handleEdit}>Edit</button>
+            )}
+            
+            {isTransferred ? (
+              <DisabledButtonWithTooltip className="p-button">
+                Add Option
+              </DisabledButtonWithTooltip>
+            ) : (
+              <Button 
+                label="Add Option" 
+                onClick={handleAddOption} 
+                disabled={isAddOptionDisabled}
+                title={isAddOptionDisabled ? 
+                  "Add Option is disabled when Pre-Visa Officer request is pending or options are received" : 
+                  "Add Option"}
+              />
+            )}
+            
+            {isTransferred ? (
+              <DisabledButtonWithTooltip className="pre-visa-request-button">
+                Request to Pre-Visa Officer
+              </DisabledButtonWithTooltip>
+            ) : (
+              <button
+                className="pre-visa-request-button"
+                onClick={handleOpenPreVisaPopup}
+                disabled={hasPendingRequest}
+              >
+                {hasPendingRequest ? 'Request Pending...' : 'Request to Pre-Visa Officer'}
+              </button>
+            )}
           </>
         ) : (
           <>
-            <button
-              className="update-button"
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? 'Updating...' : 'Update'}
-            </button>
-            <button className="cancel-button" onClick={handleCancel}>
-              Cancel
-            </button>
+            {isTransferred ? (
+              <DisabledButtonWithTooltip className="update-button">
+                Update
+              </DisabledButtonWithTooltip>
+            ) : (
+              <button className="update-button" onClick={handleSave} disabled={saving}>
+                {saving ? 'Updating...' : 'Update'}
+              </button>
+            )}
+            
+            <button className="cancel-button" onClick={handleCancel}>Cancel</button>
           </>
         )}
       </div>
+      
+      <Dialog
+        header="Add Option"
+        visible={showAdd}
+        style={{ width: "40vw" }}
+        onHide={() => setShowAdd(false)}  
+      >
+        <AddOptionPage formID={id} staffHeadID={staffHeadID} onSuccessClose={handleCloseDialog}/>
+      </Dialog>
     </div>
   );
-};
+}
 
 export default ReviewFormFull;

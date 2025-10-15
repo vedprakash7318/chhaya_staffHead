@@ -37,20 +37,20 @@ function App() {
           </Dashboard>
         } />
 
-      <Route path="Leads/view-leads" element={
+      <Route path="/view-leads" element={
           <Dashboard>
             <Leads />
           </Dashboard>
         } />
 
 
-      <Route path="Leads/ReviewForm" element={
+      <Route path="/ReviewForm" element={
           <Dashboard>
             <ReviewForm />
           </Dashboard>
         } />
 
-      <Route path="Leads/ReviewFormFull" element={
+      <Route path="ReviewForm/ReviewFormFull" element={
           <Dashboard>
             <ReviewFormFull />
           </Dashboard>

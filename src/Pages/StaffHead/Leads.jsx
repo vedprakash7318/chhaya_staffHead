@@ -229,7 +229,7 @@ function Leads() {
       {loading && leads.length === 0 ? (
         <div className="spinner-container">
           <ProgressSpinner />
-          <p>Loading leads...</p>
+          
         </div>
       ) : (
         <>

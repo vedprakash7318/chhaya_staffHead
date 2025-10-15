@@ -1,7 +1,7 @@
 /* Base Styles */
 .form-container {
   max-width: 90%;
-  margin: 20px auto;
+  margin: 0 auto;
   padding: 20px;
   background: #fff;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -11,6 +11,30 @@
 }
 .navigation-header {
   margin-bottom: 20px;
+}
+
+/* Editable field styling */
+.form-group.editable-field {
+  position: relative;
+  border: 2px solid #3b82f6 !important;
+  border-radius: 8px;
+  padding: 12px;
+  background-color: #f8fafc;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
+}
+
+.form-group.editable-field::before {
+  content: "✏️ Editable";
+  position: absolute;
+  top: -10px;
+  left: 12px;
+  background: #3b82f6;
+  color: white;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: bold;
 }
 
 .back-button {
@@ -422,6 +446,7 @@
 .popup-header h3 {
   margin: 0;
   font-size: 16px;
+  color: white;
 }
 
 .close-popup {
@@ -658,4 +683,155 @@
 
 .assign-job-button:hover {
   background-color: #0b7dda;
+}
+
+
+
+/* Accordion Styles */
+.options-accordion {
+  width: 100%;
+}
+
+.accordion-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.accordion-item:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.accordion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.accordion-header:hover {
+  background: #e9ecef;
+}
+
+.accordion-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.accordion-icon {
+  font-size: 18px;
+  font-weight: bold;
+  color: #495057;
+  margin-left: 10px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.accordion-content {
+  padding: 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #fff;
+  animation: slideDown 0.3s ease-out;
+}
+
+/* Transfer Banner */
+.transfer-banner {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+  animation: pulse 2s infinite;
+}
+
+.transfer-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.9; }
+  50% { opacity: 1; }
+  100% { opacity: 0.9; }
+}
+
+/* Tooltip for disabled buttons */
+.tooltip-container {
+  position: relative;
+  display: inline-block;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 8px;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -100px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+  font-weight: normal;
+}
+
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
+}
+
+/* Disabled state styling */
+.transferred-field {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.form-footer button:disabled,
+.tooltip-container button {
+  opacity: 0.6;
+  cursor: not-allowed;
+  position: relative;
+}
+
+/* Enhanced disabled state for transferred files */
+.form-container.transferred .form-section {
+  opacity: 0.8;
+}
+
+.form-container.transferred .form-footer button:not(.print-button) {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  cursor: not-allowed;
 }

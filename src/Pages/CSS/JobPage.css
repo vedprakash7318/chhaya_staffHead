@@ -1,19 +1,15 @@
-/* ============================================
-   JOBPAGE - MODERN STYLING
-   ============================================ */
-
 /* Container Styles */
 .JobPage-container {
-  padding: 2rem;
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; */
+  background-color: #FFFFFF;
 }
 
 /* Header Section */
 .JobPage-header-section {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border-radius: 20px;
+  border-radius: 7px;
   padding: 2rem;
   margin-bottom: 2rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
@@ -80,6 +76,7 @@
   margin-bottom: 2rem;
   gap: 2rem;
   flex-wrap: wrap;
+  
 }
 
 .JobPage-search-container {
@@ -115,6 +112,10 @@
 .JobPage-stats-container {
   display: flex;
   gap: 1rem;
+  
+}
+.p-datatable > .p-datatable-wrapper{
+  border-radius: 7px;
 }
 
 .JobPage-stat-card {
